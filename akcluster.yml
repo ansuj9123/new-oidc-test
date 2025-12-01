@@ -2,7 +2,8 @@ name: Provision AKS via Terraform (OIDC)
 
 on:
   push:
-  
+
+  workflow_dispatch:
 
 permissions:
   id-token: write # required for OIDC
