@@ -1,0 +1,39 @@
+name: Provision AKS via Terraform (OIDC)
+
+on:
+  push:
+  
+
+permissions:
+  id-token: write # required for OIDC
+  contents: read
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to Azure using OIDC
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: 131d9703-4a73-4d00-8cf1-65665a9670a9
+          enable-oidc: true
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        working-directory: environments/aks
+        run: terraform init -input=false
+
+      - name: Terraform Plan
+        working-directory: environments/aks
+        run: terraform plan -out=tfplan -input=false
+
+      - name: Terraform Apply
+        working-directory: environments/aks
+        run: terraform apply -input=false -auto-approve tfplan
